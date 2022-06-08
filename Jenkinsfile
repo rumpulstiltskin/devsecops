@@ -37,11 +37,11 @@ pipeline {
     //   }
     // }
 
-    stage('Vulnerability Scan - Docker ') {
-      steps {
-        sh "mvn dependency-check:check"
-      }
-    }
+    // stage('Vulnerability Scan - Docker ') {
+    //   steps {
+    //     sh "mvn dependency-check:check"
+    //   }
+    // }
 
     stage('Docker Build and Push') {
       steps {
@@ -52,7 +52,12 @@ pipeline {
         }
       }
     }
-
+    stage('Vulnerability Scan - Kubernetes') {
+      steps {
+        sh 'docker run --rm -v $(pwd):/project openpolicyagent/conftest test --policy opa-k8s-security.rego k8s_deployment_service.yaml'
+      }
+    }
+    
     stage('Kubernetes Deployment - DEV') {
       steps {
         withKubeConfig([credentialsId: 'kubeconfig']) {
